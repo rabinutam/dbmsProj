@@ -9,7 +9,14 @@
         - example: davisql >
     - supported commands
         - DDL
+            - SHOW TABLES
+            - CREATE TABLE
+            - DROP TABLE
+            - Not req: ALTER TABLE
         - DML
+            - INSERT INTO TABLE
+            - DELETE FROM
+            - UPDATE
         - VDL
             - SELECT-FROM-WHERE
             - EXIT: upom exit save all in non volatile files

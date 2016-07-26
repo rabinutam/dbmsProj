@@ -1,14 +1,21 @@
-import cmd, sys
+#import cmd
+try:
+    from cmd2 import Cmd
+except:
+    from cmd import Cmd
+
+import sys
 from davis_sql import SQL, SQLError
 
 devEnv = True
 
-class SqlShell(cmd.Cmd):
+class SqlShell(Cmd):
     intro = '''
-    Welcome to the DaviSQL monitor.  Commands end with ;
-    '''
+        Welcome to the DaviSQL monitor.  Commands end with ;
+        '''
     prompt = 'davisql> '
     sql = SQL()
+    multilineCommands = ['select', 'create']
 
     def do_select(self, arg):
         'read data'
@@ -30,8 +37,19 @@ class SqlShell(cmd.Cmd):
     def do_exit(self, arg):
         'exit dbms'
         print('Thank you for using davisql')
-        #bye()
         return True
+
+    def emptyline(self):
+        '''called when empty line is entered
+        if this is not overriden here, repeats last non empty cmd
+        '''
+        print '\n'
+
+    def do_EOF(self, arg):
+        if arg.endswith(';'):
+            return True
+        else:
+            return False
 
     def _print_result(self, data=None):
         '''print data as a table
