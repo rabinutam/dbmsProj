@@ -19,8 +19,9 @@ class SqlShell(Cmd):
 
     def do_select(self, arg):
         'read data'
+
+        print 'select', arg
         try:
-            print 'select', arg
             self.sql.select(arg)
             self._print_result()
         except SQLError as e:
@@ -30,11 +31,12 @@ class SqlShell(Cmd):
             if ENV=='dev':
                 raise
 
+
     def do_create(self, arg):
         'create table, database etc'
+
         print 'create', arg
         try:
-            print 'select', arg
             self.sql.create(arg)
             self._print_result()
         except SQLError as e:
@@ -43,6 +45,9 @@ class SqlShell(Cmd):
             print 'Internal Error'
             if ENV=='dev':
                 raise
+        else:
+            print 'Query OK'
+
 
     def do_exit(self, arg):
         'exit dbms'
