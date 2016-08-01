@@ -22,5 +22,13 @@
             - EXIT: upom exit save all in non volatile files
             - not req: JOIN
 '''
+
+import os
+import sys
+
+
+BASE_DIR_ABS = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR_ABS = os.path.join(BASE_DIR_ABS, 'data')
+
 DEV_ENV = True
 PAGE_SIZE = 512 #bytes
