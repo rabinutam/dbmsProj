@@ -73,21 +73,55 @@ class SQL(object):
         return columns
 
     def select(self, cli):
-        cli = self._get_clean_cli(cli)
-        #print '@ SQL.select, {0}'.format(cli)
+        try:
+            cli = self._get_clean_cli(cli)
+            #print '@ SQL.select, {0}'.format(cli)
 
-        # Parse
-        dfilter = None
-        table_name = None
-        if 'where' in cli:
-            cli, dfilter = [_.strip() for _ in cli.split('where')]
-        if 'from' in cli:
-            cli, table_name = [_.strip() for _ in cli.split('from')]
-        else:
-            raise SQLError('missing table name')
+            # Parse
+            dfilter = {}
+            table_name = None
 
-        if not table_name:
-            raise SQLError('missing table name')
+            # optional WHERE clause
+            if 'where' in cli:
+                cli, filter_text = [_.strip() for _ in cli.split('where')]
+                # now, support and and operator: = only
+                # TODO include other operators and logic
+                filter_text = filter_text.strip()
+                if 'and' in filter_text:
+                    items = filter_text.split('and')
+                else:
+                    items = [filter_text]
+                for item in items:
+                    key, val = item.split('=')
+                    dfilter[key.strip()] = val.strip()
+
+            cli = cli.strip()
+            if 'from' in cli:
+                cli, table_name = [_.strip() for _ in cli.split('from')]
+            else: # missing from clause
+                raise SQLError('SQL suntax error: missing from clause')
+
+            if not table_name: # empty table name
+                raise SQLError('SQL suntax error: missing table name')
+
+            cli = cli.strip()
+            if not cli:
+                raise SQLError('SQL syntax error: missing columns')
+            elif cli == '*':
+                columns = 'all'
+            else:
+                columns = [_.strip() for _ in cli.split(',')]
+            select_data = {
+                    'table_name': table_name,
+                    'data_filter': dfilter,
+                    'columns': columns
+                    }
+            print select_data
+        except SQLError:
+            raise # just raise
+        except:
+            print traceback.format_exc()
+            raise SQLError('SQL syntax error')
 
 
     def create(self, cli):
