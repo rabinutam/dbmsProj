@@ -140,7 +140,10 @@ class SQL(object):
             if cli == 'tables':
                 file_path = self._get_table_abs('tables')
                 columns = ['table_name']
-                result = self.fh.view_row(file_path=file_path, columns=columns)
+                try:
+                    result = self.fh.view_row(file_path=file_path, columns=columns)
+                except:
+                    result = []
             elif cli == 'databases':
                 msg = 'Unsupported or not implemented or syntax error: {0}'.format(cli)
                 raise SQLError(msg)
@@ -348,7 +351,7 @@ class SQL(object):
             #print traceback.format_exc()
             content = [
                     ['table_name', 'primary_key'],
-                    row
+                    row.values()
                     ]
             self.fh.create_file(file_path=tables_path_abs, content=content)
 
