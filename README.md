@@ -1,5 +1,14 @@
 # DBMS Project:
 
+
+### Getting started:
+    * clone this repo
+    * install dependencies in project-requirement.txt
+
+### Launch:
+    * go to /path/to/DBMSProj/
+    * python cli.py
+
 ### Prompt:
 Upon launch, DB engine presents a prompt similar to the mysql> prompt, where interactive multiline commands may be entered. 
 
