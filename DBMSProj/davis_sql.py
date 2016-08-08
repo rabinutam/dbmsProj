@@ -246,7 +246,7 @@ class SQL(object):
             dfilter = {}
             table_name = None
 
-            # optional WHERE clause
+            # required WHERE clause
             if 'where' in cli:
                 cli, filter_text = [_.strip() for _ in cli.split('where')]
                 dfilter = self._get_filter(filter_text)
@@ -271,6 +271,46 @@ class SQL(object):
             #print select_data
             file_path = self._get_table_abs(table_name)
             result = self.fh.update_row(file_path=file_path, rowid=dfilter, update_row=update_row)
+        except SQLError:
+            raise # just raise
+        except:
+            print traceback.format_exc()
+            raise SQLError('SQL syntax error')
+        return result
+
+
+    def delete(self, cli):
+        '''
+        DELETE FROM table_name WHERE some_col=some_val;
+        '''
+
+        logger.info('{0} {1};'.format('delete', cli))
+
+        try:
+            cli = self._get_clean_cli(cli)
+
+            # Parse
+            dfilter = {}
+            table_name = None
+
+            # optional WHERE clause
+            if 'where' in cli:
+                cli, filter_text = [_.strip() for _ in cli.split('where')]
+                dfilter = self._get_filter(filter_text)
+
+            if 'from' in cli:
+                cli, table_name = [_.strip() for _ in cli.split('from')]
+            else: # missing from clause
+                raise SQLError('SQL suntax error: missing from clause')
+
+            if not table_name: # empty table name
+                raise SQLError('SQL suntax error: missing table name')
+
+            if cli:
+                raise SQLError('SQL syntax error')
+
+            file_path = self._get_table_abs(table_name)
+            result = self.fh.delete_row(file_path=file_path, rowid=dfilter)
         except SQLError:
             raise # just raise
         except:
