@@ -222,7 +222,6 @@ class SQL(object):
                     'data_filter': dfilter,
                     'columns': columns
                     }
-            #print select_data
             file_path = self._get_table_abs(table_name)
             result = self.fh.view_row(file_path=file_path, rowid=dfilter, columns=columns)
         except SQLError:
@@ -268,7 +267,6 @@ class SQL(object):
                 key, val = [_.strip() for _ in item.split('=')]
                 update_row[key] = val.strip('"').strip("'")
 
-            #print select_data
             file_path = self._get_table_abs(table_name)
             result = self.fh.update_row(file_path=file_path, rowid=dfilter, update_row=update_row)
         except SQLError:

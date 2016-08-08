@@ -114,7 +114,7 @@ class FileHelper(object):
 
 
     def create_file(self, file_path=None, content=None, has_header=True):
-        print 'Creating file: {0}'.format(file_path)
+        #print 'Creating file: {0}'.format(file_path)
         try:
             self._does_file_exist(file_path)
             raise '{0} already exists'.format(file_path)
