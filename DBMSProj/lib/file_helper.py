@@ -20,7 +20,7 @@ class FileHelper(object):
             - delete_row
     '''
 
-    def read(self, file_path='', sep=None, comment='#'):
+    def read(self, file_path='', sep=None, comment='#', header_only=False):
         '''reads file and returns header and body
 
         **Parameters**
@@ -59,6 +59,8 @@ class FileHelper(object):
                 header, body = lines[0], lines[1:]
                 #take out comment char #, and split
                 header = [_.strip() for _ in header[1:].split(sep)]
+                if header_only:
+                    return header
             else:
                 body = lines
 
@@ -105,6 +107,7 @@ class FileHelper(object):
             lines = []
             for di in data:
                 if isinstance(di, (list, tuple)):
+                    print di
                     lines.append('{0}\n'.format(sep.join(di)))
                 else:
                     lines.append('{0}\n'.format(di))
@@ -112,13 +115,20 @@ class FileHelper(object):
 
 
     def create_file(self, file_path=None, content=None, has_header=True):
+        print 'Creating file: {0}'.format(file_path)
+        try:
+            self._does_file_exist(file_path)
+            raise '{0} already exists'.format(file_path)
+        except:
+            pass
+
         if has_header:
             header, body = content[0], content[1:]
             new_content = [['#{}'.format(header[0])] + header[1:]]
             new_content += body
         else:
             new_content = content
-        self.write(file_path='file_path', data=new_content, sep=',')
+        self.write(file_path=file_path, data=new_content, sep=',')
 
 
     def delete_file(self, file_path=None):
@@ -130,7 +140,58 @@ class FileHelper(object):
         os.rmdir(dir_path)
 
 
-    def insert_row(self, file_path=None, row=None, has_header=True):
+    def view_header(self, file_path):
+        self._validate_file_path(file_path)
+        header = self.read(file_path=file_path, sep=',', comment='#', header_only=True)
+        return header
+
+
+    def view_row(self, file_path=None, rowid=None, columns=None, header=False):
+        '''View row(s)
+
+        **Parameters**
+            - file_path: file for the table
+            - rowid: (identifying column, val)
+
+        **Example**
+            - file_path = 'person.tbl'
+            - rowid = ('name', 'sam')
+
+        SQL analogy, for each row (key, val):
+            SELECT * FROM table_name WHERE some_column=some_value;
+            SELECT * FROM file_path WHERE rowid_key=rowid_val;
+            SELECT * FROM table_name WHERE name='sam';
+            SELECT name FROM table_name WHERE name='sam';
+        '''
+
+        self._validate_file_path(file_path)
+
+        if header:
+            header = self.read(file_path=file_path, sep=',', comment='#', header_only=True)
+            return header
+
+        header, body = self.read(file_path=file_path, sep=',', comment='#')
+        if columns == 'all':
+            columns = None
+
+        result = [header]
+        # Existing rows: update
+        if not rowid:
+            # show all
+            result += body
+        elif isinstance(rowid, (tuple, list)):
+            rowid_index = header.index(rowid[0])
+            for row in body:
+                key = row[rowid_index]
+                if key == rowid[1]: # value
+                    result.append(row)
+        else:
+            raise Exception('Invalid row selector')
+
+        return result
+
+
+    def insert_row(self, file_path=None, row=None):
         '''Add a row
 
         **Parameters**
@@ -152,14 +213,9 @@ class FileHelper(object):
 
         # Sort by col order in table
         items = [(header.index(item[0]), item) for item in row.iteritems()]
-        new_row = [_[1][1] for _ in items.sort()]
-
-        if has_header:
-            new_content = [['#{}'.format(header[0])] + header[1:]]
-        else:
-            new_content = []
-
-        new_content.append(new_row)
+        items.sort() # sorts in place
+        new_row = [_[1][1] for _ in items]
+        new_content = [new_row]
 
         # Append new content to the table
         self.write(file_path=file_path, data=new_content, sep=',', mode='a')

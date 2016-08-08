@@ -10,20 +10,43 @@ from davis_sql import SQL, SQLError
 ENV = 'dev'
 
 class SqlShell(Cmd):
-    intro = '''
-        Welcome to the DaviSQL monitor.  Commands end with ;
+    intro = '''Welcome to the DaviSQL monitor.  Commands end with ;
         '''
     prompt = 'davisql> '
     sql = SQL()
     multilineCommands = ['select', 'create']
 
+    def do_show(self, arg):
+        'show tables, databases'
+
+        try:
+            result = self.sql.show(arg)
+            self._print_result(result)
+        except SQLError as e:
+            print e
+        except Exception as e:
+            print 'Internal Error'
+            if ENV=='dev':
+                raise
+
+    def do_drop(self, arg):
+        'drop table, database'
+
+        try:
+            self.sql.drop(arg)
+        except SQLError as e:
+            print e
+        except Exception as e:
+            print 'Internal Error'
+            if ENV=='dev':
+                raise
+
     def do_select(self, arg):
         'read data'
 
-        print 'select', arg
         try:
-            self.sql.select(arg)
-            self._print_result()
+            result = self.sql.select(arg)
+            self._print_result(result)
         except SQLError as e:
             print e
         except Exception as e:
@@ -35,10 +58,23 @@ class SqlShell(Cmd):
     def do_create(self, arg):
         'create table, database etc'
 
-        print 'create', arg
         try:
             self.sql.create(arg)
-            self._print_result()
+        except SQLError as e:
+            print e
+        except Exception as e:
+            print 'Internal Error'
+            if ENV=='dev':
+                raise
+        else:
+            print 'Query OK'
+
+
+    def do_insert(self, arg):
+        'insert row into table'
+
+        try:
+            self.sql.insert(arg)
         except SQLError as e:
             print e
         except Exception as e:
@@ -53,6 +89,7 @@ class SqlShell(Cmd):
         'exit dbms'
         print('Thank you for using davisql')
         return True
+
 
     def emptyline(self):
         '''called when empty line is entered
@@ -70,10 +107,11 @@ class SqlShell(Cmd):
         '''print data as a table
         '''
 
-        # Fake data
-        data = [
+        if not data:
+            # Fake data
+            data = [
                 ['col1', 'col2', 'col3', 'col4', 'col5'],
-                ['example', 'data', 'fixit', 'later', ''],
+                ['example', 'data', 'fixit', 'later', 'null'],
                 ['if', 'you', 'cannot', 'now', 'cool']
                 ]
 
