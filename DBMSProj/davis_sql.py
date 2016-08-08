@@ -233,6 +233,52 @@ class SQL(object):
         return result
 
 
+    def update(self, cli):
+        '''
+        UPDATE table_name SET col1=val1, col2=val2 WHERE some_col=some_val;
+        '''
+        logger.info('{0} {1};'.format('update', cli))
+
+        try:
+            cli = self._get_clean_cli(cli)
+
+            # Parse
+            dfilter = {}
+            table_name = None
+
+            # optional WHERE clause
+            if 'where' in cli:
+                cli, filter_text = [_.strip() for _ in cli.split('where')]
+                dfilter = self._get_filter(filter_text)
+            else:
+                raise SQLError('SQL suntax error: missing WHERE clause')
+
+            table_name, cli = [_.strip() for _ in cli.split(' ', 1)]
+            if not table_name:
+                raise SQLError('SQL syntax error: missing table name')
+
+            if not cli or 'set' not in cli:
+                raise SQLError('SQL syntax error: missing columns')
+
+            cli = cli[len('set '):] # tale out set
+
+            items = [_.strip() for _ in cli.split(',')]
+            update_row = {}
+            for item in items:
+                key, val = [_.strip() for _ in item.split('=')]
+                update_row[key] = val
+
+            #print select_data
+            file_path = self._get_table_abs(table_name)
+            result = self.fh.update_row(file_path=file_path, rowid=dfilter, update_row=update_row)
+        except SQLError:
+            raise # just raise
+        except:
+            print traceback.format_exc()
+            raise SQLError('SQL syntax error')
+        return result
+
+
     @staticmethod
     def _get_table_abs(table_name):
         table_file = '{0}.tbl'.format(table_name)
@@ -241,9 +287,10 @@ class SQL(object):
 
 
     def _create_table(self, rest):
-        table_name, rest = rest.split(' ', 1)
+        table_name, rest = [_.strip() for _ in rest.split(' ', 1)]
         if not table_name:
             raise SQLError('SQL syntax error: missing table name')
+
         table_file_abs = self._get_table_abs(table_name)
         columns = self.get_tbl_columns(rest)
 
