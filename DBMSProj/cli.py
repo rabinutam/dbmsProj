@@ -1,46 +1,147 @@
-import cmd, sys
+#import cmd
+try:
+    from cmd2 import Cmd
+except:
+    from cmd import Cmd
+
+import sys
 from davis_sql import SQL, SQLError
 
-devEnv = True
+ENV = 'dev'
 
-class SqlShell(cmd.Cmd):
-    intro = '''
-    Welcome to the DaviSQL monitor.  Commands end with ;
-    '''
+class SqlShell(Cmd):
+    intro = '''Welcome to the DaviSQL monitor.  Commands end with ;
+        '''
     prompt = 'davisql> '
     sql = SQL()
+    multilineCommands = ['select', 'create']
 
-    def do_select(self, arg):
-        'read data'
+    def do_show(self, arg):
+        'show tables, databases'
+
         try:
-            self.sql.select(arg)
-            print 'select', arg
-            self._print_result()
+            result = self.sql.show(arg)
+            self._print_result(result)
         except SQLError as e:
             print e
         except Exception as e:
             print 'Internal Error'
-            if devEnv:
+            if ENV=='dev':
                 raise
+
+    def do_drop(self, arg):
+        'drop table, database'
+
+        try:
+            self.sql.drop(arg)
+        except SQLError as e:
+            print e
+        except Exception as e:
+            print 'Internal Error'
+            if ENV=='dev':
+                raise
+
+    def do_select(self, arg):
+        'read data'
+
+        try:
+            result = self.sql.select(arg)
+            self._print_result(result)
+        except SQLError as e:
+            print e
+        except Exception as e:
+            print 'Internal Error'
+            if ENV=='dev':
+                raise
+
 
     def do_create(self, arg):
         'create table, database etc'
-        print 'create', arg
+
+        try:
+            self.sql.create(arg)
+        except SQLError as e:
+            print e
+        except Exception as e:
+            print 'Internal Error'
+            if ENV=='dev':
+                raise
+        else:
+            print 'Query OK'
+
+
+    def do_insert(self, arg):
+        'insert row into table'
+
+        try:
+            self.sql.insert(arg)
+        except SQLError as e:
+            print e
+        except Exception as e:
+            print 'Internal Error'
+            if ENV=='dev':
+                raise
+        else:
+            print 'Query OK'
+
+
+    def do_update(self, arg):
+        'insert row into table'
+
+        try:
+            self.sql.update(arg)
+        except SQLError as e:
+            print e
+        except Exception as e:
+            print 'Internal Error'
+            if ENV=='dev':
+                raise
+        else:
+            print 'Query OK'
+
+
+    def do_delete(self, arg):
+        'insert row into table'
+
+        try:
+            self.sql.delete(arg)
+        except SQLError as e:
+            print e
+        except Exception as e:
+            print 'Internal Error'
+            if ENV=='dev':
+                raise
+        else:
+            print 'Query OK'
+
 
     def do_exit(self, arg):
         'exit dbms'
         print('Thank you for using davisql')
-        #bye()
         return True
+
+
+    def emptyline(self):
+        '''called when empty line is entered
+        if this is not overriden here, repeats last non empty cmd
+        '''
+        print '\n'
+
+    def do_EOF(self, arg):
+        if arg.endswith(';'):
+            return True
+        else:
+            return False
 
     def _print_result(self, data=None):
         '''print data as a table
         '''
 
-        # Fake data
-        data = [
+        if not data:
+            # Fake data
+            data = [
                 ['col1', 'col2', 'col3', 'col4', 'col5'],
-                ['example', 'data', 'fixit', 'later', ''],
+                ['example', 'data', 'fixit', 'later', 'null'],
                 ['if', 'you', 'cannot', 'now', 'cool']
                 ]
 
