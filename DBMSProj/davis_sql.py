@@ -72,7 +72,7 @@ class SQL(object):
                 key = '{0}_lt'.format(key)
             elif '=' in item:
                 key, val = [_.strip() for _ in item.split('=')]
-            dfilter[key] = val
+            dfilter[key] = val.strip('"').strip("'")
         return dfilter
 
 
@@ -266,7 +266,7 @@ class SQL(object):
             update_row = {}
             for item in items:
                 key, val = [_.strip() for _ in item.split('=')]
-                update_row[key] = val
+                update_row[key] = val.strip('"').strip("'")
 
             #print select_data
             file_path = self._get_table_abs(table_name)
