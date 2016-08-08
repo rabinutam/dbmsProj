@@ -138,12 +138,7 @@ class SqlShell(Cmd):
         '''
 
         if not data:
-            # Fake data
-            data = [
-                ['col1', 'col2', 'col3', 'col4', 'col5'],
-                ['example', 'data', 'fixit', 'later', 'null'],
-                ['if', 'you', 'cannot', 'now', 'cool']
-                ]
+            return
 
         cols_width = self._get_cols_width(data=data)
         line_sep = self._get_line_sep(cols_width)
