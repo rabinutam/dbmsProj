@@ -85,6 +85,21 @@ class SqlShell(Cmd):
             print 'Query OK'
 
 
+    def do_update(self, arg):
+        'insert row into table'
+
+        try:
+            self.sql.update(arg)
+        except SQLError as e:
+            print e
+        except Exception as e:
+            print 'Internal Error'
+            if ENV=='dev':
+                raise
+        else:
+            print 'Query OK'
+
+
     def do_exit(self, arg):
         'exit dbms'
         print('Thank you for using davisql')

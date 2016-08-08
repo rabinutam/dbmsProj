@@ -162,6 +162,11 @@ class FileHelper(object):
             SELECT * FROM table_name WHERE name='sam';
             SELECT name FROM table_name WHERE name='sam';
         '''
+        if isinstance(rowid, dict):
+            try:
+                rowid = rowid.items()[0]
+            except:
+                rowid = None
 
         self._validate_file_path(file_path)
 
@@ -240,6 +245,12 @@ class FileHelper(object):
         '''
         self._validate_file_path(file_path)
 
+        if isinstance(rowid, dict):
+            try:
+                rowid = rowid.items()[0]
+            except:
+                rowid = None
+
         header, body = self.read(file_path=file_path, sep=',', comment='#')
 
         rowid_index = header.index(rowid[0])
@@ -289,6 +300,12 @@ class FileHelper(object):
         '''
 
         self._validate_file_path(file_path)
+
+        if isinstance(rowid, dict):
+            try:
+                rowid = rowid.items()[0]
+            except:
+                rowid = None
 
         header, body = self.read(file_path=file_path, sep=',', comment='#')
 
