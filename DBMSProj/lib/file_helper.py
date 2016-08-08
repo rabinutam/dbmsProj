@@ -107,7 +107,6 @@ class FileHelper(object):
             lines = []
             for di in data:
                 if isinstance(di, (list, tuple)):
-                    print di
                     lines.append('{0}\n'.format(sep.join(di)))
                 else:
                     lines.append('{0}\n'.format(di))

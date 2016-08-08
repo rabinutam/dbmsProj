@@ -167,6 +167,11 @@ class SQL(object):
                 table_name = rest.strip()
                 file_path = self._get_table_abs(table_name)
                 result = self.fh.delete_file(file_path=file_path)
+
+                # Delete table entry from tables.tbl
+                tables_path_abs = os.path.join(DATA_DIR_ABS, 'tables.tbl')
+                rowid = ('table_name', table_name)
+                self.fh.delete_row(file_path=tables_path_abs, rowid=rowid)
             elif drop_type == 'database':
                 msg = 'Unsupported or not implemented or syntax error: {0}'.format(drop_type)
                 raise SQLError(msg)
@@ -250,11 +255,12 @@ class SQL(object):
 
         # add to tables (insert or create)
         tables_path_abs = os.path.join(DATA_DIR_ABS, 'tables.tbl')
-        row = [table_name, '']
+        row = {'table_name': table_name, 'primary_key': ''} #TODO pk
         try:
             self.fh.insert_row(file_path=tables_path_abs, row=row)
         except:
             # at first table creation
+            #print traceback.format_exc()
             content = [
                     ['table_name', 'primary_key'],
                     row
@@ -321,7 +327,6 @@ class SQL(object):
             if not table_name:
                 raise SQLError('SQL syntax error: missing table name')
 
-            print rest
             if not 'values' in rest:
                 raise SQLError('SQL syntax error: missing values')
 
